@@ -13,7 +13,7 @@ datasource db {
 model Item {
   id           String    @unique
   email        String
-  content      DateTime
+  content      String
   from         DateTime
   to           DateTime?
   isTickedOff  Boolean? @default(false)

@@ -1,4 +1,11 @@
-import { PrismaClient, Prisma } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import { config } from 'dotenv';
+import { generateId } from '../../helpers/generateId';
+import { sendEmail } from '../../helpers/emailService';
+
+config();
+
+const { SENDER_EMAIL } = process.env;
 
 const prisma = new PrismaClient();
 
@@ -38,7 +45,16 @@ export const tickOff = async () => {
             for (let item of items) {
                 
                 if (item && timeLeft > 0) {
-                    console.log(`id: ${item._id}\nuserId: ${item.content}\nstartTime: ${item.from}\ntriggerTime: ${new Date()}\n\n`);
+                    const { email, content, createdAt, from } = item;
+                    const emailDetails = {
+                        templateName: 'upNextReminder',
+                        sender: SENDER_EMAIL,
+                        receiver: email,
+                        name: `${email.slice(0, email.indexOf('@'))}`,
+                        meta: `You whispered this on ${createdAt} and we echoed it when you wanted ${from}`,
+                        content: `${content}`,
+                      };
+                      sendEmail(emailDetails); 
                 } else {
                     console.log('no');
                 }
@@ -48,4 +64,33 @@ export const tickOff = async () => {
     } else {
         console.log('No Up Nexts')
     }
+};
+
+const lineUp = async (upNext) => {
+    if (upNext && new Date(upNext.from) < new Date(toDo.timeToTickOff)) {
+        await tickOff();
+    } else 
+    if (upNext && new Date(upNext.from).getTime() === new Date(toDo.timeToTickOff).getTime()) {
+        
+        toDo.items.push(upNext);
+    }
+    else {
+        await tickOff();
+    }
+    
+};
+
+export const add = async(details) => {
+    const { email, content, from, to } = details;
+    const newItem = await prisma.item.create({
+        data: {
+            id: generateId(),
+            email,
+            content,
+            from: new Date(from),
+        }
+    });
+        await lineUp(newItem);
+
+        return newItem;
 };
