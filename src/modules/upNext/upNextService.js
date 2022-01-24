@@ -76,7 +76,7 @@ export const tickOff = async () => {
                 }
         }
         
-        tickOff()
+        //tickOff()
     }, timeLeft);
     } else {
         console.log('No Up Nexts')
