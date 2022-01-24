@@ -79,7 +79,7 @@ export const tickOff = async () => {
                 //    console.log('no');
                 //}
         }
-        return tickOff(); 
+        tickOff(); 
     })
     //tickOff()
     //}, timeLeft);
