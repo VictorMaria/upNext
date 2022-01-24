@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { config } from 'dotenv';
-import { generateId } from '../../helpers/generateId';
+import Item from '../../model/item';
 import { sendEmail } from '../../helpers/emailService';
 
 config();
@@ -15,27 +15,47 @@ let timerId;
 
 const getNext = async () => {
     try {
-        const items = await prisma.item.findMany(
-            {
-                where: {
-                    from: {
-                        gte: new Date(),
-                    },
+        const result = await Item.aggregate(
+            [
+                {
+                    $match: {
+                        from: {
+                            $gte: new Date()
+                        }
+                    }
                 },
-            }
+                 {
+                     $group: {
+                         _id: { group: "$from" },
+                         upNexts: { $push: "$$ROOT" }
+                     }
+                 },
+                {
+                    $sort : { _id : 1}
+                }, 
+                {
+                     $limit: 1
+                 }
+                ]
         );
-    
-    return items;
+
+        if (result.length === 0) {
+            return 'Nothing to tick off'
+        }
+        
+    return {
+        timeToTickOff: result[0]._id.group,
+        items: result[0].upNexts,
+        }
     } catch (error) {
         console.log(error)
     }
 };
 
 export const tickOff = async () => {
-    const items = await getNext();
     
+    const { timeToTickOff, items } = await getNext();
     if (items && items.length > 0) {
-        const { from: timeToTickOff } = items[0];
         toDo.timeToTickOff = timeToTickOff;
         toDo.items = items;
         const timeLeft = new Date(timeToTickOff).getTime() - new Date().getTime();
@@ -45,20 +65,22 @@ export const tickOff = async () => {
             for (let item of items) {
                 
                 if (item && timeLeft > 0) {
-                    const { email, content, createdAt, from } = item;
+                    const { email, content, from, createdAt } = item;
+                    
                     const emailDetails = {
                         templateName: 'upNextReminder',
-                        sender: SENDER_EMAIL,
+                        sender: process.env.SENDER_EMAIL,
                         receiver: email,
-                        name: `${email.slice(0, email.indexOf('@'))}`,
+                        name: email.slice(0, email.indexOf('@')),
                         meta: `You whispered this on ${createdAt} and we echoed it when you wanted ${from}`,
                         content: `${content}`,
                       };
-                      sendEmail(emailDetails); 
+                      sendEmail(emailDetails);
                 } else {
                     console.log('no');
                 }
         }
+        
         tickOff()
     }, timeLeft);
     } else {
@@ -80,17 +102,14 @@ const lineUp = async (upNext) => {
     
 };
 
-export const add = async(details) => {
+export const add = async (details) => {
     const { email, content, from, to } = details;
-    const newItem = await prisma.item.create({
-        data: {
-            id: generateId(),
+        const newItem = await Item.create({
             email,
             content,
             from: new Date(from),
-        }
-    });
-        await lineUp(newItem);
+        });
+    await lineUp(newItem);
 
-        return newItem;
+    return newItem;
 };
