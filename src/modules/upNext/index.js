@@ -1,15 +1,15 @@
 import express from 'express';
-import * as itemController from './itemController';
-import itemValidator from '../../validation/itemValidator';
+import * as upNextController from './upNextController';
+import upNextValidator from '../../validation/upNextValidator';
 import validationHandler from '../../middleware/validationHandler';
 
 const Router = express.Router();
 
 Router.post(
-    '/items',
-    itemValidator.add,
+    '/upnexts',
+    upNextValidator.add,
     validationHandler,
-    itemController.add,
+    upNextController.add,
 );
 
 export default Router;

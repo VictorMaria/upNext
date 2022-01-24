@@ -1,14 +1,14 @@
-import mongoose from'mongoose';
+import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
-const ItemSchema = new Schema(
+const UpNextSchema = new Schema(
     {
-        email: {
+        content: {
             type: String,
             required: true,
         },
-        content: {
+        email: {
             type: String,
             required: true,
         },
@@ -29,6 +29,5 @@ const ItemSchema = new Schema(
     }
 );
 
-const Item = mongoose.model('Item', ItemSchema);
-
-export default Item;
+const UpNext = mongoose.model('UpNext', UpNextSchema);
+export default UpNext;

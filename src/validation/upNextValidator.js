@@ -1,6 +1,6 @@
 import { check } from 'express-validator';
 
-const itemValidator = {
+const upNextValidator = {
     add: [
         check('email')
             .not()
@@ -45,4 +45,4 @@ const itemValidator = {
     ],
 };
 
-export default itemValidator;
+export default upNextValidator;

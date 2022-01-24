@@ -1,13 +1,10 @@
-import { PrismaClient } from '@prisma/client';
 import { config } from 'dotenv';
-import Item from '../../model/item';
 import { sendEmail } from '../../helpers/emailService';
+import UpNext from '../../model/UpNext.js';
 
 config();
 
 const { SENDER_EMAIL } = process.env;
-
-const prisma = new PrismaClient();
 
 const toDo = {};
 toDo.items = [];
@@ -15,7 +12,7 @@ let timerId;
 
 const getNext = async () => {
     try {
-        const result = await Item.aggregate(
+        const result = await UpNext.aggregate(
             [
                 {
                     $match: {
@@ -53,23 +50,21 @@ const getNext = async () => {
 };
 
 export const tickOff = async () => {
-    
     const { timeToTickOff, items } = await getNext();
     if (items && items.length > 0) {
         toDo.timeToTickOff = timeToTickOff;
         toDo.items = items;
         const timeLeft = new Date(timeToTickOff).getTime() - new Date().getTime();
+        console.log(timeToTickOff, timeLeft)
         clearTimeout(timerId);
         
         timerId = setTimeout(() => {
             for (let item of items) {
-                
+                const { email, content, from, createdAt } = item;
                 if (item && timeLeft > 0) {
-                    const { email, content, from, createdAt } = item;
-                    
                     const emailDetails = {
                         templateName: 'upNextReminder',
-                        sender: process.env.SENDER_EMAIL,
+                        sender: SENDER_EMAIL,
                         receiver: email,
                         name: email.slice(0, email.indexOf('@')),
                         meta: `You whispered this on ${createdAt} and we echoed it when you wanted ${from}`,
@@ -104,7 +99,7 @@ const lineUp = async (upNext) => {
 
 export const add = async (details) => {
     const { email, content, from, to } = details;
-        const newItem = await Item.create({
+        const newItem = await UpNext.create({
             email,
             content,
             from: new Date(from),

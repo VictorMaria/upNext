@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { tickOff } from './modules/item/itemService';
+import { tickOff } from './modules/upNext/upNextService';
 import modules from './modules';
 import connectDb from './db';
 
@@ -12,12 +12,11 @@ app.use(express.json());
 
 modules(app);
 connectDb();
+tickOff();
 
 app.get('/', (req, res) => {
     res.status(200).json({ message: 'You whisper, we echo when you want' });
 });
-
-tickOff();
 
 setInterval(() => {
     console.log('Time flees like a thief, tick by tick');
