@@ -1,0 +1,48 @@
+{
+  "name": "upnext",
+  "version": "1.0.0",
+  "description": "A simple reminder",
+  "main": "app.js",
+  "scripts": {
+    "build": "rimraf ./dist/ && babel src --out-dir dist",
+    "start": "node ./dist/app.js",
+    "dev": "NODE_ENV=development nodemon --exec babel-node src/app.js",
+    "format": "prettier --write \"src/**/*.js\" \"test/**/*.js\"",
+    "lint": "node_modules/.bin/eslint ./src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VictorMaria/upNext.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/VictorMaria/upNext/issues"
+  },
+  "homepage": "https://github.com/VictorMaria/upNext#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.16.8",
+    "@babel/core": "^7.16.10",
+    "@babel/node": "^7.16.8",
+    "@babel/plugin-transform-runtime": "^7.16.10",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/register": "^7.16.9",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^8.7.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-prettier": "^4.0.0",
+    "nodemon": "^2.0.15",
+    "prettier": "^2.5.1",
+    "rimraf": "^3.0.2"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.12.1",
+    "@babel/runtime": "^7.16.7",
+    "cors": "^2.8.5",
+    "dotenv": "^14.2.0",
+    "express": "^4.17.2",
+    "express-validator": "^6.14.0",
+    "uuid": "^8.3.2"
+  }
+}
