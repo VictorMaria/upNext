@@ -57,7 +57,7 @@ export const tickOff = async () => {
         const timeLeft = new Date(timeToTickOff).getTime() - new Date().getTime();
         console.log(timeToTickOff, timeLeft)
         clearTimeout(timerId);
-        new Promise((resolve, reject) => { 
+        
         timerId = setTimeout(() => {
             for (let item of items) {
                 const { email, content, from, createdAt } = item;
@@ -78,7 +78,7 @@ export const tickOff = async () => {
         
     tickOff()
     }, timeLeft);
-})
+
     } else {
         console.log('No Up Nexts')
     }
