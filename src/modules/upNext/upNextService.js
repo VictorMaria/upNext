@@ -1,5 +1,4 @@
 import { config } from 'dotenv';
-import schedule from 'node-schedule';
 import { sendEmail } from '../../helpers/emailService';
 import UpNext from '../../model/UpNext.js';
 
@@ -9,7 +8,7 @@ const { SENDER_EMAIL } = process.env;
 
 const toDo = {};
 toDo.items = [];
-let job;
+let timerId;
 
 const getNext = async () => {
     try {
@@ -52,19 +51,17 @@ const getNext = async () => {
 
 export const tickOff = async () => {
     const { timeToTickOff, items } = await getNext();
-   // console.log(items)
     if (items && items.length > 0) {
         toDo.timeToTickOff = timeToTickOff;
         toDo.items = items;
-        //const timeLeft = new Date(timeToTickOff).getTime() - new Date().getTime();
-        //console.log(timeToTickOff, timeLeft)
-        //clearTimeout(timerId);
-        const timeToTick = new Date(timeToTickOff);
-        //timerId = setTimeout(() => {
-        job = schedule.scheduleJob(timeToTick, function(){    
-            for (let item of items) {
+        const timeLeft = new Date(timeToTickOff).getTime() - new Date().getTime();
+        console.log(timeToTickOff, timeLeft)
+        clearTimeout(timerId);
+        
+        timerId = setTimeout(() => {
+            const requests = items.map(async(item) => {
                 const { email, content, from, createdAt } = item;
-                //if (item && timeLeft > 0) {
+                if (item && timeLeft > 0) {
                     const emailDetails = {
                         templateName: 'upNextReminder',
                         sender: SENDER_EMAIL,
@@ -73,16 +70,17 @@ export const tickOff = async () => {
                         meta: `You whispered this on ${createdAt} and we echoed it when you wanted ${from}`,
                         content: `${content}`,
                       };
-                      sendEmail(emailDetails);
+                      const dispatch = await sendEmail(emailDetails);
+                      requests.push(dispatch)
+                      toDo.items.splice(0, toDo.items.length);
                       console.log('done')
-               // } else {
-                //    console.log('no');
-                //}
-        }
-        tickOff(); 
-    })
-    //tickOff()
-    //}, timeLeft);
+                } else {
+                    console.log('no');
+                }
+        })
+        Promise.all(requests)
+    tickOff()
+    }, timeLeft);
 
     } else {
         console.log('No Up Nexts')
