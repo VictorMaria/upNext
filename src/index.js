@@ -18,9 +18,6 @@ app.get('/', (req, res) => {
     res.status(200).json({ message: 'You whisper, we echo when you want' });
 });
 
-const today = new Date();
-console.log(today.toTimeString(), 'timezone')
-
 // setInterval(() => {
 //     console.log('Time flees like a thief, tick by tick');
 // }, 1800000);
