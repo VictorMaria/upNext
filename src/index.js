@@ -18,9 +18,12 @@ app.get('/', (req, res) => {
     res.status(200).json({ message: 'You whisper, we echo when you want' });
 });
 
-setInterval(() => {
-    console.log('Time flees like a thief, tick by tick');
-}, 1800000);
+const today = new Date();
+console.log(today.toTimeString(), 'timezone')
+
+// setInterval(() => {
+//     console.log('Time flees like a thief, tick by tick');
+// }, 1800000);
 
 const PORT = process.env.PORT || 2000;
 
